@@ -1,0 +1,27 @@
+# Blueprint do Render para a API (https://render.com/docs/blueprint-spec)
+services:
+  - type: web
+    name: wifi-dashboard-api
+    runtime: docker
+    plan: free
+    # Mesma região AWS do banco no Neon (us-east-1)
+    region: virginia
+    branch: main
+    dockerfilePath: ./api/Dockerfile
+    dockerContext: ./api
+    healthCheckPath: /health
+    autoDeploy: true
+    # Só redeploya quando a API muda
+    buildFilter:
+      paths:
+        - api/**
+    envVars:
+      # Segredos: o Render pede os valores ao criar o Blueprint (não ficam no repositório)
+      - key: DATABASE_URL
+        sync: false
+      - key: HASH_SECRET
+        sync: false
+      - key: DATABASE_SSL
+        value: 'true'
+      - key: CORS_ORIGIN
+        value: https://web-clients-wifi.vercel.app

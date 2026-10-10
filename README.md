@@ -5,10 +5,10 @@ Painel para o dono de uma loja O Boticário acompanhar os acessos ao Wi-Fi de vi
 | | Link |
 |---|---|
 | Painel (front) | `https://<preencher>.vercel.app` |
-| API | `https://<preencher>.koyeb.app` |
-| Swagger | `https://<preencher>.koyeb.app/docs` |
+| API | `https://<preencher>.onrender.com` |
+| Swagger | `https://<preencher>.onrender.com/docs` |
 
-> A API roda no plano gratuito do Koyeb, que hiberna após um período sem tráfego. O primeiro acesso pode levar alguns segundos; o painel mostra "Conectando ao servidor…" enquanto isso.
+> A API roda no plano gratuito do Render, que hiberna após 15 min sem tráfego. Um workflow do GitHub Actions a mantém acordada; se ainda assim o primeiro acesso demorar (até ~1 min), o painel mostra "Conectando ao servidor…" e carrega sozinho quando a API responder.
 
 ---
 
@@ -39,7 +39,7 @@ Definições usadas:
 ## 3. Arquitetura e stack
 
 ```
-/api   NestJS + TypeORM + Swagger  → Koyeb (Dockerfile)
+/api   NestJS + TypeORM + Swagger  → Render (Dockerfile, Blueprint em render.yaml)
 /web   Vite + React + TypeScript + Tailwind + TanStack Query + Recharts → Vercel
        PostgreSQL → Neon
 ```
@@ -80,7 +80,7 @@ sessions (id, store_id → stores, device_id → devices,
 | `GET` | `/stores/:id/metrics/summary?from&to` | Totais e variação vs. período anterior |
 | `GET` | `/stores/:id/metrics/heatmap?from&to` | Conexões por hora × dia da semana |
 | `GET` | `/stores/:id/metrics/traffic?from&to` | Série diária de visitantes |
-| `GET` | `/health` | Verifica API e banco (health check do Koyeb) |
+| `GET` | `/health` | Verifica API e banco (health check do Render) |
 
 Documentação interativa em `/docs` (Swagger gerado a partir dos DTOs).
 
@@ -160,9 +160,12 @@ O seed gera **270 dias** de histórico com padrões realistas: picos no almoço 
 | Serviço | Configuração |
 |---|---|
 | **Neon** | Criar o banco e copiar a connection string. |
-| **Koyeb** | Builder Dockerfile, *work directory* `api`, porta 3000, health check `GET /health`. Variáveis: `DATABASE_URL`, `DATABASE_SSL=true`, `CORS_ORIGIN=https://<front>.vercel.app`, `HASH_SECRET`. A migration roda ao iniciar. |
-| **Vercel** | *Root directory* `web` (preset Vite). Variáveis: `VITE_API_URL=https://<api>.koyeb.app`, `VITE_STORE_ID=6f1c2a3e-8b4d-4c5e-9f60-1a2b3c4d5e01`. |
-| **Seed em produção** | Na pasta `api`: `DATABASE_URL=<neon> DATABASE_SSL=true HASH_SECRET=<mesmo do Koyeb> npm run seed` |
+| **Render** | *New → Blueprint* apontando para este repositório: o [`render.yaml`](render.yaml) já define Docker (`api/Dockerfile`), plano free, região Virginia, health check `GET /health` e as variáveis. Só é preciso preencher os segredos `DATABASE_URL` e `HASH_SECRET`. A migration roda ao iniciar o container. |
+| **Vercel** | *Root directory* `web` (preset Vite). Variáveis: `VITE_API_URL=https://<api>.onrender.com`, `VITE_STORE_ID=6f1c2a3e-8b4d-4c5e-9f60-1a2b3c4d5e01`. |
+| **Seed em produção** | Na pasta `api`: `DATABASE_URL=<neon> DATABASE_SSL=true HASH_SECRET=<mesmo do Render> npm run migration:run && npm run seed` |
+| **Manter acordada** | Variável do repositório `API_URL=https://<api>.onrender.com` (Settings → Secrets and variables → Actions → Variables) ativa o workflow [`keep-api-warm.yml`](.github/workflows/keep-api-warm.yml), que chama `GET /` a cada 10 min. |
+
+**Por que Render e não Koyeb (como no plano original):** depois da compra do Koyeb pela Mistral (fev/2026), o plano gratuito deixou de aceitar contas novas. O Render mantém plano gratuito para web services com Docker, mas hiberna após 15 min (contra ~1h no Koyeb) e leva ~1 min para acordar. A mitigação é dupla: o ping agendado evita que a API durma, e o front trata a espera com o estado "Conectando ao servidor…" e novas tentativas automáticas.
 
 ## 9. Uso de IA
 
@@ -183,6 +186,7 @@ O seed gera **270 dias** de histórico com padrões realistas: picos no almoço 
 
 ## 10. Próximos passos
 
+- **Hospedagem sem hibernação** (plano pago ou AWS), removendo a necessidade do ping agendado.
 - **Deploy na AWS com IaC** (ex.: ECS Fargate + RDS via CDK/Terraform), com ambientes separados.
 - **CI** (lint, testes e build em cada PR) e **testes de integração** das consultas de métricas contra um Postgres real (Testcontainers), cobrindo fuso e horário de verão.
 - **Microsserviço de ingestão** recebendo eventos reais dos access points (fila + idempotência), em vez do endpoint de simulação.

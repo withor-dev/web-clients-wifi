@@ -23,7 +23,7 @@ export class ApiError extends Error {
 
 /**
  * A API não respondeu: rede, CORS, timeout ou servidor dormindo.
- * O plano gratuito do Koyeb hiberna sem tráfego, então este é o erro típico do "cold start".
+ * O plano gratuito do Render hiberna sem tráfego, então este é o erro típico do "cold start".
  */
 export class NetworkError extends Error {
   constructor(message = 'Não foi possível falar com o servidor.') {
