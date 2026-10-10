@@ -170,8 +170,6 @@ O seed gera **270 dias** de histórico com padrões realistas: picos no almoço 
 
 ## 9. Uso de IA
 
-> ✏️ _Revisar e completar com a sua visão antes do envio._
-
 - **Planejamento (humano):** o escopo, a escolha decisão → métrica, a stack, a modelagem e o cronograma foram definidos antes de abrir o editor, num plano escrito.
 - **Implementação (Claude Code):** a partir do plano, a IA gerou o esqueleto da API e do front, as consultas SQL, o seed e este README. As decisões que o plano deixava em aberto foram perguntadas, não assumidas: como o front escolhe a loja e a definição de "recorrente".
 - **Onde a IA ajudou:** velocidade no boilerplate (DTOs, Swagger, filtro de erros), nas consultas com fuso horário e no seed com padrões realistas. Também sugeriu usar HMAC em vez de SHA puro para o hash.
