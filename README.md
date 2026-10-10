@@ -4,9 +4,10 @@ Painel para o dono de uma loja O Boticário acompanhar os acessos ao Wi-Fi de vi
 
 | | Link |
 |---|---|
-| Painel (front) | `https://<preencher>.vercel.app` |
-| API | `https://<preencher>.onrender.com` |
-| Swagger | `https://<preencher>.onrender.com/docs` |
+| Painel (front) | https://web-clients-wifi.vercel.app |
+| API | https://wifi-dashboard-api.onrender.com |
+| Swagger | https://wifi-dashboard-api.onrender.com/docs |
+| Repositório | https://github.com/withor-dev/web-clients-wifi |
 
 > A API roda no plano gratuito do Render, que hiberna após 15 min sem tráfego. Um workflow do GitHub Actions a mantém acordada; se ainda assim o primeiro acesso demorar (até ~1 min), o painel mostra "Conectando ao servidor…" e carrega sozinho quando a API responder.
 
