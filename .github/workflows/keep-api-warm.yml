@@ -1,0 +1,23 @@
+# O plano gratuito do Render hiberna a API após 15 min sem tráfego e leva ~1 min para acordar.
+# Este workflow faz uma requisição a cada 10 min para mantê-la acordada.
+# Usa GET / (não consulta o banco), para não manter o Neon acordado à toa.
+# Configure a variável do repositório API_URL (Settings → Secrets and variables → Actions → Variables).
+name: Keep API warm
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    if: ${{ vars.API_URL != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Ping API
+        env:
+          API_URL: ${{ vars.API_URL }}
+        run: curl --fail --silent --show-error --max-time 120 --retry 3 --retry-delay 10 "$API_URL/"

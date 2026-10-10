@@ -15,7 +15,7 @@ export class HealthController {
     return { name: 'Wi-Fi Dashboard API', docs: '/docs', health: '/health' };
   }
 
-  /** Usado pelo health check do Koyeb e pelo front para detectar o "cold start". */
+  /** Usado pelo health check do Render. */
   @Get('health')
   @ApiOperation({ summary: 'Verifica se a API e o banco estão respondendo' })
   @ApiOkResponse({ schema: { example: { status: 'ok', database: 'ok' } } })
